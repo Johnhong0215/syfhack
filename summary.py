@@ -1,7 +1,11 @@
 import json
 from pathlib import Path
-import subprocess
+import os
 from typing import List, Dict, Optional
+from openai import OpenAI
+
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Predefined list of relevant skills
 CREDIT_MODELING_SKILLS = {
@@ -42,6 +46,23 @@ CREDIT_MODELING_SKILLS = {
     ]
 }
 
+def call_openai(prompt: str) -> str:
+    """
+    Helper function to make OpenAI API calls
+    """
+    try:
+        response = client.chat.completions.create(
+            model="o4-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that analyzes meeting transcripts and extracts structured information."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error calling OpenAI API: {str(e)}")
+        return ""
+
 def count_action_items(transcript: str) -> int:
     """
     First model call: Count the number of distinct action items in the transcript.
@@ -55,15 +76,9 @@ def count_action_items(transcript: str) -> int:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        num_stories = int(result.stdout.strip())
+        result = call_openai(prompt)
+        num_stories = int(result.strip())
         return min(10, num_stories)  # Cap at 10 stories
     except ValueError:
         print("Warning: Could not parse number of stories, defaulting to 5")
@@ -82,15 +97,9 @@ def extract_story_titles(transcript: str, num_stories: int) -> List[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        return json.loads(result.stdout.strip())
+        result = call_openai(prompt)
+        return json.loads(result.strip())
     except json.JSONDecodeError:
         print("Warning: Could not parse story titles")
         return [f"Story {i+1}" for i in range(num_stories)]
@@ -112,16 +121,8 @@ def extract_story_description(transcript: str, story_title: str) -> str:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
+    description = call_openai(prompt)
     # Clean up the output
-    description = result.stdout.strip()
-    # Remove any "Here is..." or similar introductory text
     description = description.replace("Here is a detailed description based on the transcript:", "")
     description = description.replace("Here is the description:", "")
     # Remove multiple newlines and extra spaces
@@ -132,10 +133,9 @@ def extract_required_skills(transcript: str, story_title: str) -> List[str]:
     """
     Third model call: Extract required skills for a specific story.
     """
-    # First, get the model's analysis of which skills are needed
     prompt = f"""
     For the story titled "{story_title}", analyze which skills from this list would be required:
-    {json.dumps(CREDIT_MODELING_SKILLS, indent=2)}
+    {json.dumps(CREDIT_MODELING_SKILLS)}
 
     Return a JSON array of skill names that are relevant to this story.
     Rules:
@@ -148,16 +148,10 @@ def extract_required_skills(transcript: str, story_title: str) -> List[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
+        result = call_openai(prompt)
         # Clean up the output to ensure we only get the JSON array
-        output = result.stdout.strip()
+        output = result.strip()
         # Remove any text before or after the JSON array
         start_idx = output.find('[')
         end_idx = output.rfind(']') + 1
@@ -173,48 +167,37 @@ def estimate_story_points(transcript: str, story_title: str) -> int:
     Fourth model call: Estimate story points for a specific story.
     """
     prompt = f"""
-    For the story titled "{story_title}", estimate the story points (1-5) based on complexity.
-    Return just the number as an integer.
+    For the story titled "{story_title}", estimate the story points (1-13) based on this transcript.
+    Return just the number as an integer. Just the number.
 
     Transcript:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        points = int(result.stdout.strip())
-        return max(1, min(5, points))  # Ensure points are between 1 and 5
+        result = call_openai(prompt)
+        points = int(result.strip())
+        return max(1, min(13, points))  # Ensure points are between 1 and 13
     except ValueError:
-        return 3  # Default to middle value
+        print(f"Warning: Could not parse story points for: {story_title}")
+        return 5
 
 def extract_prerequisites(transcript: str, story_title: str) -> List[str]:
     """
     Fifth model call: Extract prerequisites for a specific story.
     """
     prompt = f"""
-    For the story titled "{story_title}", extract any prerequisites from this transcript.
+    For the story titled "{story_title}", extract any prerequisites or dependencies mentioned in this transcript.
     Return them as a JSON array of strings.
-    Only include prerequisites that are explicitly mentioned.
+    If no prerequisites are mentioned, return an empty array [].
 
     Transcript:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        return json.loads(result.stdout.strip())
+        result = call_openai(prompt)
+        return json.loads(result.strip())
     except json.JSONDecodeError:
         return []
 
@@ -235,16 +218,10 @@ def extract_assignee(transcript: str, story_title: str) -> Optional[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
+        result = call_openai(prompt)
         # Clean up the output to ensure we only get the JSON array
-        output = result.stdout.strip()
+        output = result.strip()
         # Remove any text before or after the JSON array
         start_idx = output.find('[')
         end_idx = output.rfind(']') + 1
