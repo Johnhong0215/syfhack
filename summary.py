@@ -1,7 +1,13 @@
 import json
 from pathlib import Path
-import subprocess
+import boto3
 from typing import List, Dict, Optional
+
+# Initialize Bedrock client
+bedrock = boto3.client(
+    service_name='bedrock-runtime',
+    region_name='us-east-1'  # Change this to your region
+)
 
 # Predefined list of relevant skills
 CREDIT_MODELING_SKILLS = {
@@ -42,6 +48,27 @@ CREDIT_MODELING_SKILLS = {
     ]
 }
 
+def call_bedrock(prompt: str) -> str:
+    """
+    Helper function to call Bedrock Claude model
+    """
+    body = json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1000,
+        "messages": [{
+            "role": "user",
+            "content": prompt
+        }]
+    })
+    
+    response = bedrock.invoke_model(
+        modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+        body=body
+    )
+    
+    response_body = json.loads(response.get('body').read())
+    return response_body['content'][0]['text']
+
 def count_action_items(transcript: str) -> int:
     """
     First model call: Count the number of distinct action items in the transcript.
@@ -55,15 +82,9 @@ def count_action_items(transcript: str) -> int:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        num_stories = int(result.stdout.strip())
+        result = call_bedrock(prompt)
+        num_stories = int(result.strip())
         return min(10, num_stories)  # Cap at 10 stories
     except ValueError:
         print("Warning: Could not parse number of stories, defaulting to 5")
@@ -82,15 +103,9 @@ def extract_story_titles(transcript: str, num_stories: int) -> List[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        return json.loads(result.stdout.strip())
+        result = call_bedrock(prompt)
+        return json.loads(result.strip())
     except json.JSONDecodeError:
         print("Warning: Could not parse story titles")
         return [f"Story {i+1}" for i in range(num_stories)]
@@ -112,15 +127,9 @@ def extract_story_description(transcript: str, story_title: str) -> str:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
+    description = call_bedrock(prompt)
     # Clean up the output
-    description = result.stdout.strip()
+    description = description.strip()
     # Remove any "Here is..." or similar introductory text
     description = description.replace("Here is a detailed description based on the transcript:", "")
     description = description.replace("Here is the description:", "")
@@ -132,7 +141,6 @@ def extract_required_skills(transcript: str, story_title: str) -> List[str]:
     """
     Third model call: Extract required skills for a specific story.
     """
-    # First, get the model's analysis of which skills are needed
     prompt = f"""
     For the story titled "{story_title}", analyze which skills from this list would be required:
     {json.dumps(CREDIT_MODELING_SKILLS, indent=2)}
@@ -148,16 +156,10 @@ def extract_required_skills(transcript: str, story_title: str) -> List[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
+        result = call_bedrock(prompt)
         # Clean up the output to ensure we only get the JSON array
-        output = result.stdout.strip()
+        output = result.strip()
         # Remove any text before or after the JSON array
         start_idx = output.find('[')
         end_idx = output.rfind(']') + 1
@@ -180,15 +182,9 @@ def estimate_story_points(transcript: str, story_title: str) -> int:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        points = int(result.stdout.strip())
+        result = call_bedrock(prompt)
+        points = int(result.strip())
         return max(1, min(5, points))  # Ensure points are between 1 and 5
     except ValueError:
         return 3  # Default to middle value
@@ -206,15 +202,9 @@ def extract_prerequisites(transcript: str, story_title: str) -> List[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
-        return json.loads(result.stdout.strip())
+        result = call_bedrock(prompt)
+        return json.loads(result.strip())
     except json.JSONDecodeError:
         return []
 
@@ -235,16 +225,10 @@ def extract_assignee(transcript: str, story_title: str) -> Optional[str]:
     {transcript}
     """
     
-    result = subprocess.run(
-        ["ollama", "run", "llama3.2", prompt],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
     try:
+        result = call_bedrock(prompt)
         # Clean up the output to ensure we only get the JSON array
-        output = result.stdout.strip()
+        output = result.strip()
         # Remove any text before or after the JSON array
         start_idx = output.find('[')
         end_idx = output.rfind(']') + 1

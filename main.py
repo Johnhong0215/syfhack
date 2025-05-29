@@ -2,6 +2,14 @@ from pathlib import Path
 from transcription import convert_to_wav, transcribe_with_faster_whisper
 from summary import analyze_action_items
 import json
+import os
+import boto3
+
+# Ensure AWS credentials are set
+if not os.getenv('AWS_ACCESS_KEY_ID') or not os.getenv('AWS_SECRET_ACCESS_KEY'):
+    print("[⚠️] AWS credentials not found in environment variables.")
+    print("Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY")
+    exit(1)
 
 input_folder = Path("input")
 output_folder = Path("output")
