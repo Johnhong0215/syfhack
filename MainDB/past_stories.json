@@ -1,0 +1,751 @@
+[
+  {
+    "id": "STORY-100",
+    "category": "Feature Engineering",
+    "story_points": 2,
+    "due_date": "2025-03-08",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "Data Cleaning",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-101",
+    "category": "Model Development",
+    "story_points": 4,
+    "due_date": "2025-03-12",
+    "assignee": "Daniel Moore",
+    "skills_required": [
+      "Python",
+      "Data Cleaning",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-102",
+    "category": "Feature Engineering",
+    "story_points": 1,
+    "due_date": "2025-05-17",
+    "assignee": "Sarah Davis",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": [
+      "STORY-101"
+    ]
+  },
+  {
+    "id": "STORY-103",
+    "category": "Monitoring",
+    "story_points": 2,
+    "due_date": "2025-03-14",
+    "assignee": "Sarah Davis",
+    "skills_required": [
+      "Credit Risk Modeling",
+      "SQL",
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-104",
+    "category": "Feature Engineering",
+    "story_points": 2,
+    "due_date": "2025-01-24",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-105",
+    "category": "Feature Engineering",
+    "story_points": 3,
+    "due_date": "2025-04-27",
+    "assignee": "Daniel Moore",
+    "skills_required": [
+      "SQL",
+      "Model Validation",
+      "Data Cleaning"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-106",
+    "category": "Model Development",
+    "story_points": 5,
+    "due_date": "2025-04-17",
+    "assignee": "Olivia Anderson",
+    "skills_required": [
+      "Python",
+      "Model Validation",
+      "Data Cleaning"
+    ],
+    "prerequisites": [
+      "STORY-100"
+    ]
+  },
+  {
+    "id": "STORY-107",
+    "category": "Model Testing",
+    "story_points": 1,
+    "due_date": "2025-05-07",
+    "assignee": "Sarah Davis",
+    "skills_required": [
+      "Python",
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-108",
+    "category": "Model Development",
+    "story_points": 2,
+    "due_date": "2025-05-09",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "Model Validation"
+    ],
+    "prerequisites": [
+      "STORY-105"
+    ]
+  },
+  {
+    "id": "STORY-109",
+    "category": "Model Testing",
+    "story_points": 3,
+    "due_date": "2025-02-25",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Data Cleaning",
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-110",
+    "category": "Feature Engineering",
+    "story_points": 5,
+    "due_date": "2025-03-26",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "Regression Analysis",
+      "Model Validation",
+      "Python"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-111",
+    "category": "Data Pipeline",
+    "story_points": 1,
+    "due_date": "2025-04-02",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "SQL",
+      "Regression Analysis",
+      "Data Cleaning"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-112",
+    "category": "Data Pipeline",
+    "story_points": 3,
+    "due_date": "2025-03-28",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "Model Validation",
+      "SQL",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-113",
+    "category": "Data Pipeline",
+    "story_points": 2,
+    "due_date": "2025-04-27",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "SQL",
+      "Regression Analysis",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": [
+      "STORY-110"
+    ]
+  },
+  {
+    "id": "STORY-114",
+    "category": "Data Pipeline",
+    "story_points": 3,
+    "due_date": "2025-05-05",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-115",
+    "category": "Data Pipeline",
+    "story_points": 4,
+    "due_date": "2025-03-14",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "Python"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-116",
+    "category": "Data Pipeline",
+    "story_points": 3,
+    "due_date": "2025-01-19",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Python",
+      "Model Validation"
+    ],
+    "prerequisites": [
+      "STORY-115"
+    ]
+  },
+  {
+    "id": "STORY-117",
+    "category": "Feature Engineering",
+    "story_points": 2,
+    "due_date": "2025-03-11",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Python",
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-118",
+    "category": "Feature Engineering",
+    "story_points": 4,
+    "due_date": "2025-01-07",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "Data Cleaning",
+      "Model Validation",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-119",
+    "category": "Monitoring",
+    "story_points": 2,
+    "due_date": "2025-03-14",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-120",
+    "category": "Feature Engineering",
+    "story_points": 3,
+    "due_date": "2025-05-20",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Data Cleaning",
+      "Credit Risk Modeling",
+      "Regression Analysis"
+    ],
+    "prerequisites": [
+      "STORY-103"
+    ]
+  },
+  {
+    "id": "STORY-121",
+    "category": "Model Development",
+    "story_points": 2,
+    "due_date": "2025-02-12",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Python"
+    ],
+    "prerequisites": [
+      "STORY-117"
+    ]
+  },
+  {
+    "id": "STORY-122",
+    "category": "Feature Engineering",
+    "story_points": 2,
+    "due_date": "2025-01-16",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Credit Risk Modeling",
+      "Python"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-123",
+    "category": "Model Testing",
+    "story_points": 5,
+    "due_date": "2025-01-25",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Model Validation",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-124",
+    "category": "Model Testing",
+    "story_points": 1,
+    "due_date": "2025-02-09",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Python"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-125",
+    "category": "Monitoring",
+    "story_points": 5,
+    "due_date": "2025-03-16",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "Data Cleaning",
+      "SQL"
+    ],
+    "prerequisites": [
+      "STORY-105"
+    ]
+  },
+  {
+    "id": "STORY-126",
+    "category": "Feature Engineering",
+    "story_points": 1,
+    "due_date": "2025-04-18",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "Data Cleaning",
+      "SQL",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-127",
+    "category": "Feature Engineering",
+    "story_points": 5,
+    "due_date": "2025-02-06",
+    "assignee": "John Smith",
+    "skills_required": [
+      "Data Cleaning",
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-128",
+    "category": "Model Development",
+    "story_points": 3,
+    "due_date": "2025-01-13",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "Regression Analysis",
+      "Python",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-129",
+    "category": "Feature Engineering",
+    "story_points": 5,
+    "due_date": "2025-03-02",
+    "assignee": "John Smith",
+    "skills_required": [
+      "SQL",
+      "Data Cleaning",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-130",
+    "category": "Model Testing",
+    "story_points": 1,
+    "due_date": "2025-01-12",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "Regression Analysis",
+      "Credit Risk Modeling",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-131",
+    "category": "Monitoring",
+    "story_points": 3,
+    "due_date": "2025-05-23",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-132",
+    "category": "Model Testing",
+    "story_points": 5,
+    "due_date": "2025-05-03",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "Model Validation",
+      "Credit Risk Modeling",
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-133",
+    "category": "Data Pipeline",
+    "story_points": 2,
+    "due_date": "2025-01-11",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-134",
+    "category": "Model Development",
+    "story_points": 2,
+    "due_date": "2025-05-13",
+    "assignee": "Olivia Anderson",
+    "skills_required": [
+      "Data Cleaning"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-135",
+    "category": "Feature Engineering",
+    "story_points": 1,
+    "due_date": "2025-04-27",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "Python",
+      "Data Cleaning",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-136",
+    "category": "Data Pipeline",
+    "story_points": 3,
+    "due_date": "2025-01-29",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "Data Cleaning",
+      "Regression Analysis",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-137",
+    "category": "Data Pipeline",
+    "story_points": 3,
+    "due_date": "2025-03-03",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "Data Cleaning",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-138",
+    "category": "Monitoring",
+    "story_points": 1,
+    "due_date": "2025-04-28",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "Python",
+      "Credit Risk Modeling",
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-139",
+    "category": "Model Development",
+    "story_points": 1,
+    "due_date": "2025-02-14",
+    "assignee": "Olivia Anderson",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-140",
+    "category": "Monitoring",
+    "story_points": 5,
+    "due_date": "2025-04-29",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "Model Validation",
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-141",
+    "category": "Data Pipeline",
+    "story_points": 1,
+    "due_date": "2025-01-17",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-142",
+    "category": "Model Testing",
+    "story_points": 2,
+    "due_date": "2025-03-09",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "Model Validation",
+      "Python"
+    ],
+    "prerequisites": [
+      "STORY-141"
+    ]
+  },
+  {
+    "id": "STORY-143",
+    "category": "Model Development",
+    "story_points": 4,
+    "due_date": "2024-12-30",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Python",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-144",
+    "category": "Data Pipeline",
+    "story_points": 1,
+    "due_date": "2025-04-20",
+    "assignee": "Daniel Moore",
+    "skills_required": [
+      "SQL",
+      "Python"
+    ],
+    "prerequisites": [
+      "STORY-134"
+    ]
+  },
+  {
+    "id": "STORY-145",
+    "category": "Feature Engineering",
+    "story_points": 3,
+    "due_date": "2025-01-31",
+    "assignee": "Daniel Moore",
+    "skills_required": [
+      "Credit Risk Modeling",
+      "Data Cleaning",
+      "SQL"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-146",
+    "category": "Monitoring",
+    "story_points": 3,
+    "due_date": "2025-05-15",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "Regression Analysis",
+      "Model Validation",
+      "Data Cleaning"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-147",
+    "category": "Data Pipeline",
+    "story_points": 2,
+    "due_date": "2025-01-03",
+    "assignee": "Michael Brown",
+    "skills_required": [
+      "Regression Analysis",
+      "Data Cleaning"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-148",
+    "category": "Data Pipeline",
+    "story_points": 5,
+    "due_date": "2025-03-08",
+    "assignee": "Sarah Davis",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-149",
+    "category": "Monitoring",
+    "story_points": 1,
+    "due_date": "2025-01-06",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-150",
+    "category": "Monitoring",
+    "story_points": 2,
+    "due_date": "2025-03-12",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "SQL",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": [
+      "STORY-136"
+    ]
+  },
+  {
+    "id": "STORY-151",
+    "category": "Feature Engineering",
+    "story_points": 2,
+    "due_date": "2025-03-10",
+    "assignee": "Sarah Davis",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": [
+      "STORY-145"
+    ]
+  },
+  {
+    "id": "STORY-152",
+    "category": "Feature Engineering",
+    "story_points": 4,
+    "due_date": "2025-05-22",
+    "assignee": "Emily Johnson",
+    "skills_required": [
+      "Regression Analysis"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-153",
+    "category": "Model Development",
+    "story_points": 3,
+    "due_date": "2025-02-16",
+    "assignee": "Sarah Davis",
+    "skills_required": [
+      "Python",
+      "Model Validation",
+      "Data Cleaning"
+    ],
+    "prerequisites": [
+      "STORY-102"
+    ]
+  },
+  {
+    "id": "STORY-154",
+    "category": "Data Pipeline",
+    "story_points": 1,
+    "due_date": "2025-01-18",
+    "assignee": "John Smith",
+    "skills_required": [
+      "Regression Analysis",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-155",
+    "category": "Model Testing",
+    "story_points": 4,
+    "due_date": "2025-05-14",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Data Cleaning",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-156",
+    "category": "Data Pipeline",
+    "story_points": 4,
+    "due_date": "2025-05-22",
+    "assignee": "James Taylor",
+    "skills_required": [
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-157",
+    "category": "Data Pipeline",
+    "story_points": 4,
+    "due_date": "2025-02-06",
+    "assignee": "Ashley Martinez",
+    "skills_required": [
+      "Model Validation",
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-158",
+    "category": "Model Development",
+    "story_points": 5,
+    "due_date": "2025-03-12",
+    "assignee": "David Wilson",
+    "skills_required": [
+      "SQL",
+      "Regression Analysis",
+      "Model Validation"
+    ],
+    "prerequisites": []
+  },
+  {
+    "id": "STORY-159",
+    "category": "Model Testing",
+    "story_points": 1,
+    "due_date": "2025-05-07",
+    "assignee": "Jessica Thomas",
+    "skills_required": [
+      "Credit Risk Modeling"
+    ],
+    "prerequisites": []
+  }
+]

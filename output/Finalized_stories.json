@@ -1,0 +1,178 @@
+[
+  {
+    "title": "Story 1",
+    "description": "We need to finalize the fraud detection model update by Tuesday, June 3rd, with John providing analysts ready for review, and Justin reviewing pipeline updates. The new CFPV explainability rules must be implemented by July 1st, with full support from the credit limit model and documentation being audit-ready.",
+    "required_skills": [
+      "Model Validation",
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Credit Risk Modeling",
+      "FICO Score Interpretation",
+      "Regulatory Compliance",
+      "Fraud Detection",
+      "Scorecard Development",
+      "Model Governance Documentation"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 2",
+    "description": "We need to finalize the shaft dashboard by Thursday, remove model docs and flag anything that needs polishing by July 7th, and scope out changes for Priya's three-tier risk model by June 6th with a proposal ready shortly after.",
+    "required_skills": [
+      "Model Validation",
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Credit Risk Modeling",
+      "FICO Score Interpretation",
+      "Regulatory Compliance",
+      "Fraud Detection",
+      "Scorecard Development",
+      "Model Governance Documentation",
+      "Lending Decisions",
+      "Profitability Analysis"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 3",
+    "description": "We need to finalize the shaft dashboard by Thursday, polish model documentation by July 7th, launch the income estimation model retraining pipeline by tomorrow evening and send results by Wednesday, scope out changes for Priya's three-tier risk model proposal by June 6th, and reconvene on June 5th at 10 p.m.",
+    "required_skills": [
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Fraud Detection",
+      "FICO Score Interpretation",
+      "Model Governance Documentation",
+      "Regulatory Compliance",
+      "Data Cleaning",
+      "Credit Risk Modeling",
+      "Scorecard Development"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 4",
+    "description": "We need to finalize the credit limit model documentation by June 7th, polish any remaining items, and have legal review the explainability rules by June 30th. Also, we should compare pre and post accuracy of the income estimation model pipeline results by Wednesday, which will be launched after this call.",
+    "required_skills": [
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Fraud Detection",
+      "Regulatory Compliance",
+      "FICO Score Interpretation",
+      "Scorecard Development",
+      "Model Governance Documentation"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 5",
+    "description": "Description: Review the project updates and ensure key requirements are met by Tuesday (John), finalize the credit limit model documentation by Thursday, launch the income estimation model retraining pipeline by tomorrow evening, propose a new three-tier risk model for instant approvals by June 6th, and reconvene on June 5th at 10 p.m.",
+    "required_skills": [
+      "Model Validation",
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Credit Risk Modeling",
+      "FICO Score Interpretation",
+      "Regulatory Compliance",
+      "Fraud Detection",
+      "Scorecard Development",
+      "Model Governance Documentation",
+      "Lending Decisions"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 6",
+    "description": "Description: John needs analysts ready by June 3rd, while he will finalize the credit limit model documentation by June 7th and compare pre- and post-retraining accuracy results by Wednesday; David is expected to retrain the income estimation model in two weeks; Priya's three-tier risk model proposal should be scoped out by June 6th with Michael's validation on theory logic, and another meeting will take place on June 5th at 10 p.m.",
+    "required_skills": [
+      "Time Series Analysis",
+      "Fraud Detection",
+      "Scorecard Development"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 7",
+    "description": "We need to finalize the credit limit model documentation by June 7th for audit readiness, with any necessary polishing done before then. We also need to scope out changes to the scoring backend and propose a new three-tier risk model for instant approvals by June 6th. Additionally, we will reconvene on June 5th at 10 p.m.",
+    "required_skills": [
+      "Model Validation",
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Credit Risk Modeling",
+      "FICO Score Interpretation",
+      "Regulatory Compliance",
+      "Fraud Detection",
+      "Scorecard Development",
+      "Model Governance Documentation"
+    ],
+    "story_points": 4,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 8",
+    "description": "Description: Update on key projects including fraud detection model review by Tuesday, June 3rd for analysts readiness; full support on credit limit model documentation due July 1st with legal input before end of June; retraining of income estimation model to start today with results sent by Wednesday; and simplification of three-tier risk model for instant approvals to be proposed by June 6th.",
+    "required_skills": [
+      "Model Validation",
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Fraud Detection",
+      "Scorecard Development",
+      "Model Governance Documentation"
+    ],
+    "story_points": 4,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 9",
+    "description": "We need to validate the future of pipeline by April, analyze distribution by segment, finalize the shaft dashboard documentation by June 3rd and remove model docs by July 7th, compare pre- and post-retraining accuracy results by Wednesday, scope out changes for the three-tier risk model by June 6th, and reconvene on June 5th at 10 p.m.",
+    "required_skills": [
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Fraud Detection",
+      "Model Governance Documentation",
+      "FICO Score Interpretation",
+      "Regulatory Compliance"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  },
+  {
+    "title": "Story 10",
+    "description": "Description: Review the current fraud detection model recall (0.79) for potential issues with new car holders under 30 and plan to retrain the income estimation model by next week, sending results on Wednesday; also scope out changes to the three-tier risk model for instant approvals by June 6th.",
+    "required_skills": [
+      "Model Validation",
+      "Data Cleaning",
+      "Feature Engineering",
+      "Time Series Analysis",
+      "Credit Risk Modeling",
+      "FICO Score Interpretation",
+      "Regulatory Compliance",
+      "Fraud Detection",
+      "Scorecard Development",
+      "Model Governance Documentation"
+    ],
+    "story_points": 3,
+    "prerequisites": [],
+    "assignee": "John"
+  }
+]
