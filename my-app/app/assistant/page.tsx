@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ArrowRight, Bot, Bug, Calendar, CheckCircle2, Circle, Upload, FileAudio, GripVertical } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { ArrowRight, Bot, Bug, Calendar, CheckCircle2, Circle, Upload, FileAudio, GripVertical, Loader2 } from "lucide-react"
 
 // Centralized project configuration
 const projectConfig = {
@@ -62,189 +63,22 @@ interface GeneratedStory {
   description: string
   type: "story" | "bug" | "task"
   priority: "low" | "medium" | "high" | "critical"
-  storyPoints: number
+  storyPoints?: number
   acceptanceCriteria: string[]
   status: "generated" | "in-backlog" | "in-sprint"
   assignedTo?: string
   sprint?: string
 }
 
-// Pre-populated stories from meeting analysis
-const initialGeneratedStories: GeneratedStory[] = [
-  {
-    id: "GEN-1",
-    title: "User Authentication System",
-    description:
-      "As a user, I want to be able to create an account and log in securely so that I can access personalized features.",
-    type: "story",
-    priority: "high",
-    storyPoints: 8,
-    acceptanceCriteria: [
-      "User can register with email and password",
-      "User can log in with valid credentials",
-      "User receives appropriate error messages for invalid inputs",
-      "User session is maintained across browser refreshes",
-      "User can log out successfully",
-    ],
-    status: "generated",
-  },
-  {
-    id: "GEN-2",
-    title: "Dashboard Analytics Widget",
-    description:
-      "As a project manager, I want to see key metrics on my dashboard so that I can track project progress at a glance.",
-    type: "story",
-    priority: "medium",
-    storyPoints: 5,
-    acceptanceCriteria: [
-      "Display total number of issues",
-      "Show completion percentage",
-      "Display issues by priority breakdown",
-      "Show sprint progress indicator",
-      "Update metrics in real-time",
-    ],
-    status: "generated",
-  },
-  {
-    id: "GEN-3",
-    title: "Mobile Responsive Design",
-    description:
-      "As a user, I want the application to work well on mobile devices so that I can manage tasks on the go.",
-    type: "task",
-    priority: "medium",
-    storyPoints: 3,
-    acceptanceCriteria: [
-      "All pages are responsive on mobile devices",
-      "Touch interactions work properly",
-      "Text is readable without zooming",
-      "Navigation is accessible on small screens",
-      "Performance is optimized for mobile",
-    ],
-    status: "generated",
-  },
-  {
-    id: "GEN-4",
-    title: "Fix Memory Leak in Dashboard",
-    description:
-      "There is a memory leak occurring when users stay on the dashboard for extended periods, causing browser slowdown.",
-    type: "bug",
-    priority: "high",
-    storyPoints: 3,
-    acceptanceCriteria: [
-      "Identify source of memory leak",
-      "Implement proper cleanup of event listeners",
-      "Test memory usage over extended periods",
-      "Verify fix doesn't break existing functionality",
-      "Add monitoring to prevent future leaks",
-    ],
-    status: "generated",
-  },
-  {
-    id: "GEN-5",
-    title: "Advanced Search Functionality",
-    description:
-      "As a user, I want to search for issues using multiple criteria so that I can quickly find specific items.",
-    type: "story",
-    priority: "low",
-    storyPoints: 5,
-    acceptanceCriteria: [
-      "Search by title and description",
-      "Filter by assignee, priority, and status",
-      "Support date range filtering",
-      "Save search preferences",
-      "Export search results",
-    ],
-    status: "generated",
-  },
-]
-
-// Pre-populated backlog stories
-const initialBacklogStories: GeneratedStory[] = [
-  {
-    id: "BL-1",
-    title: "Email Notification System",
-    description:
-      "As a team member, I want to receive email notifications for important updates so that I stay informed about project changes.",
-    type: "story",
-    priority: "medium",
-    storyPoints: 8,
-    acceptanceCriteria: [
-      "Send notifications for issue assignments",
-      "Notify on status changes",
-      "Allow users to configure notification preferences",
-      "Support email templates",
-      "Include unsubscribe functionality",
-    ],
-    status: "in-backlog",
-    assignedTo: "Alice Johnson",
-  },
-  {
-    id: "BL-2",
-    title: "Data Export Feature",
-    description:
-      "As a project manager, I want to export project data in various formats so that I can create reports for stakeholders.",
-    type: "story",
-    priority: "low",
-    storyPoints: 5,
-    acceptanceCriteria: [
-      "Export to CSV format",
-      "Export to PDF format",
-      "Include filtering options",
-      "Schedule automatic exports",
-      "Email export results",
-    ],
-    status: "in-backlog",
-    assignedTo: "Bob Wilson",
-  },
-]
-
-// Pre-populated sprint stories
-const initialSprintStories: GeneratedStory[] = [
-  {
-    id: "SP-1",
-    title: "Real-time Collaboration",
-    description:
-      "As a team member, I want to see real-time updates when other team members make changes so that we can collaborate effectively.",
-    type: "story",
-    priority: "high",
-    storyPoints: 13,
-    acceptanceCriteria: [
-      "Real-time updates using WebSockets",
-      "Show who is currently viewing/editing",
-      "Conflict resolution for simultaneous edits",
-      "Offline support with sync",
-      "Performance optimization for large teams",
-    ],
-    status: "in-sprint",
-    assignedTo: "John Doe",
-    sprint: "S-3",
-  },
-  {
-    id: "SP-2",
-    title: "Performance Optimization",
-    description:
-      "As a user, I want the application to load quickly and respond smoothly so that I can work efficiently.",
-    type: "task",
-    priority: "high",
-    storyPoints: 8,
-    acceptanceCriteria: [
-      "Page load time under 2 seconds",
-      "Optimize database queries",
-      "Implement caching strategy",
-      "Minimize bundle size",
-      "Add performance monitoring",
-    ],
-    status: "in-sprint",
-    assignedTo: "Charlie Brown",
-    sprint: "S-4",
-  },
-]
-
 export default function AssistantPage() {
-  const [generatedStories, setGeneratedStories] = useState<GeneratedStory[]>(initialGeneratedStories)
-  const [backlogStories, setBacklogStories] = useState<GeneratedStory[]>(initialBacklogStories)
-  const [sprintStories, setSprintStories] = useState<GeneratedStory[]>(initialSprintStories)
+  // Initialize with empty arrays
+  const [generatedStories, setGeneratedStories] = useState<GeneratedStory[]>([])
+  const [backlogStories, setBacklogStories] = useState<GeneratedStory[]>([])
+  const [sprintStories, setSprintStories] = useState<GeneratedStory[]>([])
+  
   const [isProcessing, setIsProcessing] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [loadingStage, setLoadingStage] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedStory, setSelectedStory] = useState<GeneratedStory | null>(null)
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
@@ -263,50 +97,116 @@ export default function AssistantPage() {
     if (!selectedFile) return
 
     setIsProcessing(true)
+    setLoadingProgress(0)
+    setLoadingStage("Analyzing audio file...")
 
-    // Simulate AI processing delay
-    setTimeout(() => {
-      const newStories: GeneratedStory[] = [
-        {
-          id: `GEN-${generatedStories.length + 1}`,
-          title: "Meeting Action Item: API Integration",
-          description:
-            "As discussed in the meeting, we need to integrate with the third-party payment API to handle transactions.",
-          type: "story",
-          priority: "high",
-          storyPoints: 8,
-          acceptanceCriteria: [
-            "Research payment API documentation",
-            "Implement API integration",
-            "Add error handling for API failures",
-            "Test with sandbox environment",
-            "Deploy to production",
-          ],
-          status: "generated",
-        },
-        {
-          id: `GEN-${generatedStories.length + 2}`,
-          title: "Meeting Action Item: User Feedback System",
-          description:
-            "Based on meeting discussion, implement a feedback system for users to report issues and suggestions.",
-          type: "story",
-          priority: "medium",
-          storyPoints: 5,
-          acceptanceCriteria: [
-            "Create feedback form UI",
-            "Set up backend to store feedback",
-            "Add email notifications for new feedback",
-            "Create admin dashboard to view feedback",
-            "Implement feedback categorization",
-          ],
-          status: "generated",
-        },
-      ]
+    // Simulate progressive loading with different stages
+    const stages = [
+      { progress: 20, text: "Transcribing audio to text..." },
+      { progress: 40, text: "Identifying key discussion points..." },
+      { progress: 60, text: "Extracting user stories and requirements..." },
+      { progress: 80, text: "Generating acceptance criteria..." },
+      { progress: 100, text: "Finalizing story details..." }
+    ]
 
-      setGeneratedStories([...newStories, ...generatedStories])
-      setIsProcessing(false)
-      setSelectedFile(null)
-    }, 3000)
+    let currentStage = 0
+    const progressInterval = setInterval(() => {
+      if (currentStage < stages.length) {
+        setLoadingProgress(stages[currentStage].progress)
+        setLoadingStage(stages[currentStage].text)
+        currentStage++
+      } else {
+        clearInterval(progressInterval)
+        
+        // Generate new stories without story points or assigned users
+        const newStories: GeneratedStory[] = [
+          {
+            id: `GEN-${Date.now()}-1`,
+            title: "User Authentication System",
+            description:
+              "As a user, I want to be able to create an account and log in securely so that I can access personalized features.",
+            type: "story",
+            priority: "high",
+            acceptanceCriteria: [
+              "User can register with email and password",
+              "User can log in with valid credentials",
+              "User receives appropriate error messages for invalid inputs",
+              "User session is maintained across browser refreshes",
+              "User can log out successfully",
+            ],
+            status: "generated",
+          },
+          {
+            id: `GEN-${Date.now()}-2`,
+            title: "Dashboard Analytics Widget",
+            description:
+              "As a project manager, I want to see key metrics on my dashboard so that I can track project progress at a glance.",
+            type: "story",
+            priority: "medium",
+            acceptanceCriteria: [
+              "Display total number of issues",
+              "Show completion percentage",
+              "Display issues by priority breakdown",
+              "Show sprint progress indicator",
+              "Update metrics in real-time",
+            ],
+            status: "generated",
+          },
+          {
+            id: `GEN-${Date.now()}-3`,
+            title: "Mobile Responsive Design",
+            description:
+              "As a user, I want the application to work well on mobile devices so that I can manage tasks on the go.",
+            type: "task",
+            priority: "medium",
+            acceptanceCriteria: [
+              "All pages are responsive on mobile devices",
+              "Touch interactions work properly",
+              "Text is readable without zooming",
+              "Navigation is accessible on small screens",
+              "Performance is optimized for mobile",
+            ],
+            status: "generated",
+          },
+          {
+            id: `GEN-${Date.now()}-4`,
+            title: "Fix Memory Leak in Dashboard",
+            description:
+              "There is a memory leak occurring when users stay on the dashboard for extended periods, causing browser slowdown.",
+            type: "bug",
+            priority: "high",
+            acceptanceCriteria: [
+              "Identify source of memory leak",
+              "Implement proper cleanup of event listeners",
+              "Test memory usage over extended periods",
+              "Verify fix doesn't break existing functionality",
+              "Add monitoring to prevent future leaks",
+            ],
+            status: "generated",
+          },
+          {
+            id: `GEN-${Date.now()}-5`,
+            title: "Advanced Search Functionality",
+            description:
+              "As a user, I want to search for issues using multiple criteria so that I can quickly find specific items.",
+            type: "story",
+            priority: "low",
+            acceptanceCriteria: [
+              "Search by title and description",
+              "Filter by assignee, priority, and status",
+              "Support date range filtering",
+              "Save search preferences",
+              "Export search results",
+            ],
+            status: "generated",
+          },
+        ]
+
+        setGeneratedStories(newStories)
+        setIsProcessing(false)
+        setSelectedFile(null)
+      }
+    }, 600) // 600ms per stage for smooth progression
   }
 
   // Drag and drop handlers
@@ -461,6 +361,21 @@ export default function AssistantPage() {
 
   return (
     <div className="p-6 h-screen overflow-hidden">
+      {/* Loading Screen Overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Processing Audio File</h3>
+              <p className="text-gray-600 mb-6">{loadingStage}</p>
+              <Progress value={loadingProgress} className="w-full mb-2" />
+              <p className="text-sm text-gray-500">{loadingProgress}% complete</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center">
@@ -484,6 +399,7 @@ export default function AssistantPage() {
               accept="audio/*"
               onChange={handleFileUpload}
               className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              disabled={isProcessing}
             />
           </div>
           <Button onClick={processAudioFile} disabled={isProcessing || !selectedFile}>
@@ -515,14 +431,11 @@ export default function AssistantPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-3">
-            {isProcessing && (
-              <Card className="animate-pulse">
-                <CardContent className="p-4">
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                </CardContent>
-              </Card>
+            {generatedStories.length === 0 && !isProcessing && (
+              <div className="text-center py-8 text-gray-500">
+                <FileAudio className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>Upload an audio file to generate stories</p>
+              </div>
             )}
 
             {generatedStories.map((story) => (
@@ -552,7 +465,7 @@ export default function AssistantPage() {
 
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="outline" className="text-xs">
-                      {story.storyPoints} pts
+                      {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
                     </Badge>
                     <Badge variant="outline" className="text-xs capitalize">
                       {story.priority}
@@ -590,6 +503,13 @@ export default function AssistantPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-3">
+            {backlogStories.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Circle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>No items in backlog</p>
+              </div>
+            )}
+
             {backlogStories.map((story) => (
               <Card
                 key={story.id}
@@ -633,7 +553,7 @@ export default function AssistantPage() {
 
                   <div className="flex items-center justify-between">
                     <Badge variant="outline" className="text-xs">
-                      {story.storyPoints} pts
+                      {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
                     </Badge>
                     <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
                   </div>
@@ -658,6 +578,13 @@ export default function AssistantPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-3">
+            {sprintStories.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>No items in sprint</p>
+              </div>
+            )}
+
             {sprintStories.map((story) => (
               <Card
                 key={story.id}
@@ -701,7 +628,7 @@ export default function AssistantPage() {
 
                   <div className="flex items-center justify-between">
                     <Badge variant="outline" className="text-xs">
-                      {story.storyPoints} pts
+                      {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
                     </Badge>
                     <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
                   </div>
