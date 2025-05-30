@@ -87,9 +87,9 @@ interface ProjectConfig {
 
 // Centralized project configuration - easy to modify
 const projectConfig: ProjectConfig = {
-  name: "HackTracker",
+  name: "Synchrum Master",
   key: "HACK",
-  description: "Hackathon Project Management",
+  description: "SYF Agentic Scrum Support",
   statusColumns: [
     { id: "todo", title: "To Do", status: "todo", color: "bg-gray-100" },
     { id: "in-progress", title: "In Progress", status: "in-progress", color: "bg-blue-100" },

@@ -446,7 +446,7 @@ export default function AssistantPage() {
           }
           setSprintStories((prev) => [updatedStory, ...prev])
         }
-      }, 50)
+      }, 200)
     } catch (error) {
       console.error("Error handling drop:", error)
     } finally {

@@ -6,8 +6,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "HackTracker - Project Management",
-  description: "Hackathon project management tool",
+  title: "Synchrum Master",
+  description: "SYF Agentic Scrum Support",
 }
 
 export default function RootLayout({
