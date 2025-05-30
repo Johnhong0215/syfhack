@@ -255,8 +255,8 @@ export default function AssistantPage() {
 
     const finalizeStages = [
       { progress: 25, text: "Converting stories to kanban issues..." },
-      { progress: 50, text: "Clearing generated stories and backlog..." },
-      { progress: 75, text: "Moving sprint stories to kanban board..." },
+      { progress: 50, text: "Assigning team members..." },
+      { progress: 75, text: "Moving stories to kanban board..." },
       { progress: 100, text: "Finalizing project setup..." }
     ]
 
@@ -269,19 +269,55 @@ export default function AssistantPage() {
       } else {
         clearInterval(finalizeInterval)
         
+        // Function to randomly assign team members with better distribution
+        const assignTeamMembers = (stories: GeneratedStory[]) => {
+          const assignments: string[] = []
+          const storyPointOptions = [1, 2, 3, 5, 8, 13] // Fibonacci sequence for story points
+          
+          stories.forEach((story, index) => {
+            // Use round-robin with some randomness for better distribution
+            const baseIndex = index % teamMembers.length
+            const randomOffset = Math.floor(Math.random() * 3) - 1 // -1, 0, or 1
+            const finalIndex = Math.max(0, Math.min(teamMembers.length - 1, baseIndex + randomOffset))
+            
+            assignments.push(teamMembers[finalIndex].name)
+          })
+          
+          return assignments
+        }
+
+        // Function to assign realistic story points based on issue type and complexity
+        const assignStoryPoints = (story: GeneratedStory) => {
+          if (story.storyPoints) return story.storyPoints
+          
+          // Assign points based on type and some randomness
+          const basePoints = {
+            'bug': [1, 2, 3], // Bugs are usually smaller
+            'task': [2, 3, 5], // Tasks are medium
+            'story': [3, 5, 8, 13] // Stories can be larger
+          }
+          
+          const options = basePoints[story.type] || [3, 5, 8]
+          const randomIndex = Math.floor(Math.random() * options.length)
+          return options[randomIndex]
+        }
+
+        // Get assignments for all sprint stories
+        const assignments = assignTeamMembers(sprintStories)
+        
         // Convert sprint stories to kanban issues and move to "To Do" column
-        const kanbanIssuesFromSprint: KanbanIssue[] = sprintStories.map((story) => ({
+        const kanbanIssuesFromSprint: KanbanIssue[] = sprintStories.map((story, index) => ({
           id: story.id.replace('GEN-', 'HACK-'),
           title: story.title,
           description: story.description,
           status: "todo" as const,
           priority: story.priority,
           type: story.type,
-          assignee: story.assignedTo,
+          assignee: assignments[index], // Assign the distributed team member
           reporter: "AI Assistant",
           created: new Date().toISOString().split("T")[0],
           sprint: story.sprint,
-          storyPoints: story.storyPoints,
+          storyPoints: assignStoryPoints(story), // Assign realistic story points
           acceptanceCriteria: story.acceptanceCriteria,
         }))
 
@@ -822,7 +858,7 @@ export default function AssistantPage() {
             <Badge variant="secondary">{kanbanIssues.length} issues</Badge>
           </div>
 
-          <div className="grid grid-cols-4 gap-6 h-[500px]">
+          <div className="grid grid-cols-4 gap-6 h-[600px]">
             {projectConfig.statusColumns.map((column) => (
               <div
                 key={column.id}
@@ -840,39 +876,223 @@ export default function AssistantPage() {
                   </Badge>
                 </div>
 
-                <div className="space-y-3 min-h-[400px] overflow-y-auto">
+                <div className="space-y-3 min-h-[500px] overflow-y-auto">
                   {kanbanIssues
                     .filter((issue) => issue.status === column.status)
                     .map((issue) => (
                       <Card
                         key={issue.id}
-                        draggable
+                        draggable={editingIssue !== issue.id}
                         onDragStart={(e) => handleKanbanDragStart(e, issue.id)}
                         onDragEnd={handleKanbanDragEnd}
-                        className={`cursor-move hover:shadow-md transition-all duration-200 ${
+                        className={`group ${editingIssue === issue.id ? 'cursor-default' : 'cursor-move'} hover:shadow-md transition-all duration-200 ${
                           kanbanDraggedIssue === issue.id ? "opacity-50 rotate-2 scale-105" : ""
                         }`}
                       >
                         <CardContent className="p-4">
                           {editingIssue === issue.id ? (
-                            <div className="space-y-3">
-                              <Input
-                                value={editFormData.title || ""}
-                                onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                                className="font-medium"
-                              />
-                              <Textarea
-                                value={editFormData.description || ""}
-                                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                                className="text-sm"
-                                rows={2}
-                              />
-                              <div className="flex items-center space-x-2">
-                                <Button size="sm" onClick={saveEdit}>
+                            <div className="space-y-4">
+                              {/* Title */}
+                              <div>
+                                <Label className="text-sm font-medium">Title</Label>
+                                <Input
+                                  value={editFormData.title || ""}
+                                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                  className="font-medium"
+                                  placeholder="Enter issue title"
+                                />
+                              </div>
+
+                              {/* Description */}
+                              <div>
+                                <Label className="text-sm font-medium">Description</Label>
+                                <Textarea
+                                  value={editFormData.description || ""}
+                                  onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                  className="text-sm"
+                                  rows={3}
+                                  placeholder="Enter issue description"
+                                />
+                              </div>
+
+                              {/* Type and Priority Row */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label className="text-sm font-medium">Type</Label>
+                                  <Select 
+                                    value={editFormData.type || "story"} 
+                                    onValueChange={(value) => setEditFormData({ ...editFormData, type: value as KanbanIssue["type"] })}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="story">
+                                        <div className="flex items-center space-x-2">
+                                          <Circle className="w-3 h-3 text-blue-500" />
+                                          <span>Story</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="bug">
+                                        <div className="flex items-center space-x-2">
+                                          <Bug className="w-3 h-3 text-red-500" />
+                                          <span>Bug</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="task">
+                                        <div className="flex items-center space-x-2">
+                                          <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                          <span>Task</span>
+                                        </div>
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div>
+                                  <Label className="text-sm font-medium">Priority</Label>
+                                  <Select 
+                                    value={editFormData.priority || "medium"} 
+                                    onValueChange={(value) => setEditFormData({ ...editFormData, priority: value as KanbanIssue["priority"] })}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="low">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                                          <span>Low</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="medium">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                                          <span>Medium</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="high">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-2 h-2 rounded-full bg-orange-500" />
+                                          <span>High</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="critical">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-2 h-2 rounded-full bg-red-500" />
+                                          <span>Critical</span>
+                                        </div>
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Assignee and Story Points Row */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label className="text-sm font-medium">Assignee</Label>
+                                  <Select 
+                                    value={editFormData.assignee || "unassigned"} 
+                                    onValueChange={(value) => setEditFormData({ ...editFormData, assignee: value === "unassigned" ? undefined : value })}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue placeholder="Select assignee" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="unassigned">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-4 h-4 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <span className="text-xs text-gray-600">?</span>
+                                          </div>
+                                          <span>Unassigned</span>
+                                        </div>
+                                      </SelectItem>
+                                      {teamMembers.map((member) => (
+                                        <SelectItem key={member.id} value={member.name}>
+                                          <div className="flex items-center space-x-2">
+                                            <Avatar className="h-4 w-4">
+                                              <AvatarFallback className="text-xs">
+                                                {member.name.split(" ").map((n) => n[0]).join("")}
+                                              </AvatarFallback>
+                                            </Avatar>
+                                            <span>{member.name}</span>
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div>
+                                  <Label className="text-sm font-medium">Story Points</Label>
+                                  <Select 
+                                    value={editFormData.storyPoints?.toString() || "unestimated"} 
+                                    onValueChange={(value) => setEditFormData({ 
+                                      ...editFormData, 
+                                      storyPoints: value === "unestimated" ? undefined : parseInt(value)
+                                    })}
+                                  >
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="unestimated">Unestimated</SelectItem>
+                                      <SelectItem value="1">1 point</SelectItem>
+                                      <SelectItem value="2">2 points</SelectItem>
+                                      <SelectItem value="3">3 points</SelectItem>
+                                      <SelectItem value="5">5 points</SelectItem>
+                                      <SelectItem value="8">8 points</SelectItem>
+                                      <SelectItem value="13">13 points</SelectItem>
+                                      <SelectItem value="21">21 points</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Sprint Assignment */}
+                              <div>
+                                <Label className="text-sm font-medium">Sprint</Label>
+                                <Select 
+                                  value={editFormData.sprint || "none"} 
+                                  onValueChange={(value) => setEditFormData({ ...editFormData, sprint: value === "none" ? undefined : value })}
+                                >
+                                  <SelectTrigger className="h-8">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="none">No sprint</SelectItem>
+                                    {availableSprints.map((sprint) => (
+                                      <SelectItem key={sprint.id} value={sprint.id}>
+                                        {sprint.name} ({sprint.status})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Acceptance Criteria */}
+                              {editFormData.acceptanceCriteria && editFormData.acceptanceCriteria.length > 0 && (
+                                <div>
+                                  <Label className="text-sm font-medium">Acceptance Criteria</Label>
+                                  <div className="space-y-2 max-h-24 overflow-y-auto">
+                                    {editFormData.acceptanceCriteria.map((criteria, index) => (
+                                      <div key={index} className="flex items-start space-x-2 text-xs">
+                                        <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                        <span className="text-gray-600">{criteria}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Action Buttons */}
+                              <div className="flex items-center space-x-2 pt-2 border-t">
+                                <Button size="sm" onClick={saveEdit} className="flex-1">
                                   <Check className="w-3 h-3 mr-1" />
-                                  Save
+                                  Save Changes
                                 </Button>
-                                <Button size="sm" variant="outline" onClick={cancelEditing}>
+                                <Button size="sm" variant="outline" onClick={cancelEditing} className="flex-1">
                                   <X className="w-3 h-3 mr-1" />
                                   Cancel
                                 </Button>
@@ -880,17 +1100,19 @@ export default function AssistantPage() {
                             </div>
                           ) : (
                             <>
-                              <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center space-x-2">
                                   {getTypeIcon(issue.type)}
                                   <span className="text-sm font-medium text-gray-600">{issue.id}</span>
+                                  <div className={`w-2 h-2 rounded-full ${getPriorityColor(issue.priority)}`} />
                                 </div>
                                 <div className="flex items-center space-x-1">
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => startEditing(issue)}
-                                    className="h-6 w-6 p-0"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Edit issue"
                                   >
                                     <Edit3 className="w-3 h-3" />
                                   </Button>
@@ -898,32 +1120,78 @@ export default function AssistantPage() {
                                 </div>
                               </div>
 
-                              <h5 className="font-medium mb-2">{issue.title}</h5>
-                              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{issue.description}</p>
+                              <h5 className="font-medium mb-2 text-gray-900 leading-tight">{issue.title}</h5>
+                              <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">{issue.description}</p>
 
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                  <div className={`w-2 h-2 rounded-full ${getPriorityColor(issue.priority)}`} />
-                                  {issue.storyPoints && (
-                                    <Badge variant="outline" className="text-xs">
-                                      {issue.storyPoints} pts
+                              {/* Issue Details */}
+                              <div className="space-y-2 mb-3">
+                                {/* Priority and Type */}
+                                <div className="flex items-center justify-between text-xs">
+                                  <div className="flex items-center space-x-1">
+                                    <span className="text-gray-500">Priority:</span>
+                                    <Badge variant="outline" className="text-xs capitalize">
+                                      {issue.priority}
                                     </Badge>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <span className="text-gray-500">Type:</span>
+                                    <Badge variant="outline" className="text-xs capitalize">
+                                      {issue.type}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                {/* Story Points and Sprint */}
+                                <div className="flex items-center justify-between text-xs">
+                                  <div className="flex items-center space-x-1">
+                                    <span className="text-gray-500">Points:</span>
+                                    <Badge variant="outline" className="text-xs">
+                                      {issue.storyPoints ? `${issue.storyPoints}` : "?"}
+                                    </Badge>
+                                  </div>
+                                  {issue.sprint && (
+                                    <div className="flex items-center space-x-1">
+                                      <span className="text-gray-500">Sprint:</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {issue.sprint}
+                                      </Badge>
+                                    </div>
                                   )}
                                 </div>
-                                {issue.assignee ? (
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarFallback className="text-xs">
-                                      {issue.assignee
-                                        .split(" ")
-                                        .map((n) => n[0])
-                                        .join("")}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                ) : (
-                                  <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span className="text-xs text-gray-500">?</span>
-                                  </div>
-                                )}
+
+                                {/* Reporter */}
+                                <div className="text-xs text-gray-500">
+                                  <span>Reporter: {issue.reporter}</span>
+                                </div>
+                              </div>
+
+                              {/* Assignee and Actions */}
+                              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                <div className="flex items-center space-x-2">
+                                  {issue.assignee ? (
+                                    <>
+                                      <Avatar className="h-6 w-6">
+                                        <AvatarFallback className="text-xs">
+                                          {issue.assignee
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .join("")}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <span className="text-xs text-gray-600">{issue.assignee}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <span className="text-xs text-gray-500">?</span>
+                                      </div>
+                                      <span className="text-xs text-gray-500">Unassigned</span>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {issue.created}
+                                </div>
                               </div>
                             </>
                           )}
