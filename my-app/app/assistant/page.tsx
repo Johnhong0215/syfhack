@@ -47,14 +47,10 @@ const projectConfig = {
 
 // Team members
 const teamMembers = [
-  { id: "1", name: "John Doe", email: "john@example.com" },
-  { id: "2", name: "Jane Smith", email: "jane@example.com" },
-  { id: "3", name: "Alice Johnson", email: "alice@example.com" },
-  { id: "4", name: "Bob Wilson", email: "bob@example.com" },
-  { id: "5", name: "Charlie Brown", email: "charlie@example.com" },
-  { id: "6", name: "Diana Prince", email: "diana@example.com" },
-  { id: "7", name: "Eve Davis", email: "eve@example.com" },
-  { id: "8", name: "Frank Miller", email: "frank@example.com" },
+  { id: "1", name: "John", email: "john@example.com" },
+  { id: "2", name: "Sarah", email: "sarah@example.com" },
+  { id: "3", name: "David", email: "david@example.com" },
+  { id: "4", name: "Priya", email: "priya@example.com" },
 ]
 
 // Available sprints
@@ -156,85 +152,113 @@ export default function AssistantPage() {
       } else {
         clearInterval(progressInterval)
         
-        // Generate new stories without story points or assigned users
+        // Generate new stories based on the fraud detection and credit risk modeling meeting
         const newStories: GeneratedStory[] = [
           {
             id: `GEN-${Date.now()}-1`,
-            title: "User Authentication System",
-            description:
-              "As a user, I want to be able to create an account and log in securely so that I can access personalized features.",
+            title: "Fraud Model Recall Decline Analysis for New Young Car Holders",
+            description: "Analysts must investigate the recall drop among new car holders under 30, validate segment distributions, audit pipeline noise and deliver their findings by June 3. The credit-limit model needs full CFPV explainability support by July 1 with audit-ready documentation flagged by July 7 and legal review before end of June.",
             type: "story",
             priority: "high",
             acceptanceCriteria: [
-              "User can register with email and password",
-              "User can log in with valid credentials",
-              "User receives appropriate error messages for invalid inputs",
-              "User session is maintained across browser refreshes",
-              "User can log out successfully",
+              "Analysts ready by Tuesday, June 3rd",
+              "Validate distributions by segment after Justin's pipeline update",
+              "Full SHAP support and audit-ready documentation for credit limit model",
+              "Legal involvement before the end of June",
+              "Complete income estimation model retraining pipeline",
+              "Preliminary cutoffs based on historical approval rates",
+              "Michael's validation of theory logic and success criteria"
             ],
             status: "generated",
           },
           {
             id: `GEN-${Date.now()}-2`,
-            title: "Dashboard Analytics Widget",
-            description:
-              "As a project manager, I want to see key metrics on my dashboard so that I can track project progress at a glance.",
-            type: "story",
-            priority: "medium",
+            title: "Verify False Positives and Data Drift in Fraud Detection Pipeline",
+            description: "Investigate the fraud detection model's performance drop (recall down from 0.87 to 0.79) and rising false positives among new car holders under 30 by performing a deep dive into potential data drift, profile shifts post-campaign and pipeline noise, validating distributions by segment.",
+            type: "bug",
+            priority: "critical",
             acceptanceCriteria: [
-              "Display total number of issues",
-              "Show completion percentage",
-              "Display issues by priority breakdown",
-              "Show sprint progress indicator",
-              "Update metrics in real-time",
+              "Analysts ready by Tuesday, June 3rd",
+              "Access to the April pipeline update to check for noise",
+              "Deep dive analysis into data drift and profile shifts",
+              "Validation of distributions by customer segment",
+              "Detailed report on false positive causes"
             ],
             status: "generated",
           },
           {
             id: `GEN-${Date.now()}-3`,
-            title: "Mobile Responsive Design",
-            description:
-              "As a user, I want the application to work well on mobile devices so that I can manage tasks on the go.",
-            type: "task",
-            priority: "medium",
+            title: "Implement CFPB Explainability Rules for Credit Limit Model",
+            description: "Integrate full SHAP explainability support into the credit limit model by July 1, finalize the dashboard by next Thursday and deliver audit-ready documentation polished by June 7, and remove outdated model docs. Schedule a pre-audit legal review before June 30.",
+            type: "story",
+            priority: "high",
             acceptanceCriteria: [
-              "All pages are responsive on mobile devices",
-              "Touch interactions work properly",
-              "Text is readable without zooming",
-              "Navigation is accessible on small screens",
-              "Performance is optimized for mobile",
+              "Full SHAP support on the credit limit model",
+              "Completion of the SHAP dashboard",
+              "Audit-ready documentation delivered",
+              "Legal review scheduled before June 30",
+              "Compliance with new CFPB rules effective July 1"
             ],
             status: "generated",
           },
           {
             id: `GEN-${Date.now()}-4`,
-            title: "Fix Memory Leak in Dashboard",
-            description:
-              "There is a memory leak occurring when users stay on the dashboard for extended periods, causing browser slowdown.",
-            type: "bug",
-            priority: "high",
+            title: "Retrain Income Estimation Model and Compare Accuracy",
+            description: "Kick off retraining of the income estimation model today via the pipeline and ensure it completes by tomorrow evening. Compare pre- and post-retraining accuracy metrics and compile the results. Deliver the accuracy comparison report by Wednesday.",
+            type: "task",
+            priority: "medium",
             acceptanceCriteria: [
-              "Identify source of memory leak",
-              "Implement proper cleanup of event listeners",
-              "Test memory usage over extended periods",
-              "Verify fix doesn't break existing functionality",
-              "Add monitoring to prevent future leaks",
+              "Launch the pipeline immediately after the call",
+              "Pipeline completion by tomorrow evening",
+              "Compare pre- and post-retraining accuracy metrics",
+              "Compile comprehensive results report",
+              "Deliver final report by Wednesday"
             ],
             status: "generated",
           },
           {
             id: `GEN-${Date.now()}-5`,
-            title: "Advanced Search Functionality",
-            description:
-              "As a user, I want to search for issues using multiple criteria so that I can quickly find specific items.",
+            title: "Design Simplified Three-Tier Risk Model for Instant Approvals",
+            description: "Define preliminary cutoffs for low, medium, and high risk tiers using historical approval rates, scope required scoring-backend changes, and deliver the proposed three-tier model structure by June 6. Collaborate with Michael to validate the logic and establish clear success criteria.",
             type: "story",
-            priority: "low",
+            priority: "medium",
             acceptanceCriteria: [
-              "Search by title and description",
-              "Filter by assignee, priority, and status",
-              "Support date range filtering",
-              "Save search preferences",
-              "Export search results",
+              "Access to historical approval rates data",
+              "Define preliminary cutoffs for three risk tiers",
+              "Scope required scoring-backend changes",
+              "Collaborate with Michael on logic validation",
+              "Establish clear success criteria for instant approvals",
+              "Deliver proposal by June 6"
+            ],
+            status: "generated",
+          },
+          {
+            id: `GEN-${Date.now()}-6`,
+            title: "Pipeline Noise Validation Across Customer Segments",
+            description: "Validate distributions across customer segments to identify noise introduced by the April pipeline update, with a deeper dive into segment-level drift and rising false positives (especially new car holders under 30). Analysts must prepare and deliver the full distribution reports by Tuesday, June 3.",
+            type: "task",
+            priority: "high",
+            acceptanceCriteria: [
+              "Validate pipeline distributions by segment",
+              "Identify noise from April/Justin pipeline update",
+              "Deep dive into segment-level drift analysis",
+              "Focus on new car holders under 30 segment",
+              "Deliver full distribution reports by June 3"
+            ],
+            status: "generated",
+          },
+          {
+            id: `GEN-${Date.now()}-7`,
+            title: "Coordinate Legal Consultation on Model Explainability",
+            description: "Add legal consultation to the pre-audit checklist and schedule a short sync with the legal team by June 30 to ensure CFPB explainability compliance for the credit limit model. Finalize the SHAP dashboard by next Thursday and deliver audit-ready documentation by July 1.",
+            type: "task",
+            priority: "medium",
+            acceptanceCriteria: [
+              "Add legal consultation to pre-audit checklist",
+              "Schedule sync with legal team before June 30",
+              "Ensure CFPB explainability compliance",
+              "Finalize SHAP dashboard by next Thursday",
+              "Polish documentation by July 7"
             ],
             status: "generated",
           },
@@ -269,21 +293,23 @@ export default function AssistantPage() {
       } else {
         clearInterval(finalizeInterval)
         
-        // Function to randomly assign team members with better distribution
-        const assignTeamMembers = (stories: GeneratedStory[]) => {
-          const assignments: string[] = []
-          const storyPointOptions = [1, 2, 3, 5, 8, 13] // Fibonacci sequence for story points
-          
-          stories.forEach((story, index) => {
-            // Use round-robin with some randomness for better distribution
-            const baseIndex = index % teamMembers.length
-            const randomOffset = Math.floor(Math.random() * 3) - 1 // -1, 0, or 1
-            const finalIndex = Math.max(0, Math.min(teamMembers.length - 1, baseIndex + randomOffset))
-            
-            assignments.push(teamMembers[finalIndex].name)
+        // Function to assign specific team members based on story content
+        const assignSpecificTeamMembers = (stories: GeneratedStory[]) => {
+          return stories.map((story) => {
+            // Assign based on story content/expertise areas
+            if (story.title.includes("Fraud Model") || story.title.includes("False Positives") || story.title.includes("Pipeline Noise")) {
+              return "John" // Fraud detection specialist
+            } else if (story.title.includes("CFPB") || story.title.includes("Legal") || story.title.includes("Explainability")) {
+              return "Sarah" // Compliance specialist  
+            } else if (story.title.includes("Income") || story.title.includes("Retrain") || story.title.includes("Accuracy")) {
+              return "David" // Model retraining specialist
+            } else if (story.title.includes("Three-Tier") || story.title.includes("Risk Model") || story.title.includes("Approvals")) {
+              return "Priya" // Risk modeling specialist
+            } else {
+              // Default assignment for any remaining stories
+              return "John"
+            }
           })
-          
-          return assignments
         }
 
         // Function to assign realistic story points based on issue type and complexity
@@ -303,7 +329,7 @@ export default function AssistantPage() {
         }
 
         // Get assignments for all sprint stories
-        const assignments = assignTeamMembers(sprintStories)
+        const assignments = assignSpecificTeamMembers(sprintStories)
         
         // Convert sprint stories to kanban issues and move to "To Do" column
         const kanbanIssuesFromSprint: KanbanIssue[] = sprintStories.map((story, index) => ({
