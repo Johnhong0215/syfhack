@@ -17,9 +17,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRight, Bot, Bug, Calendar, CheckCircle2, Circle, Upload, FileAudio, GripVertical, Loader2 } from "lucide-react"
+import { ArrowRight, Bot, Bug, Calendar, CheckCircle2, Circle, Upload, FileAudio, GripVertical, Loader2, MoreHorizontal, Edit3, Check, X } from "lucide-react"
 
 // Centralized project configuration
 const projectConfig = {
@@ -35,6 +36,12 @@ const projectConfig = {
     { id: "story", name: "Story", icon: "circle", color: "text-blue-500" },
     { id: "bug", name: "Bug", icon: "bug", color: "text-red-500" },
     { id: "task", name: "Task", icon: "check-circle", color: "text-green-500" },
+  ],
+  statusColumns: [
+    { id: "todo", title: "To Do", status: "todo", color: "bg-gray-100" },
+    { id: "in-progress", title: "In Progress", status: "in-progress", color: "bg-blue-100" },
+    { id: "review", title: "Review", status: "review", color: "bg-yellow-100" },
+    { id: "done", title: "Done", status: "done", color: "bg-green-100" },
   ],
 }
 
@@ -70,11 +77,31 @@ interface GeneratedStory {
   sprint?: string
 }
 
+interface KanbanIssue {
+  id: string
+  title: string
+  description: string
+  status: "todo" | "in-progress" | "review" | "done"
+  priority: "low" | "medium" | "high" | "critical"
+  type: "story" | "bug" | "task"
+  assignee?: string
+  reporter: string
+  created: string
+  sprint?: string
+  storyPoints?: number
+  acceptanceCriteria?: string[]
+}
+
 export default function AssistantPage() {
   // Initialize with empty arrays
   const [generatedStories, setGeneratedStories] = useState<GeneratedStory[]>([])
   const [backlogStories, setBacklogStories] = useState<GeneratedStory[]>([])
   const [sprintStories, setSprintStories] = useState<GeneratedStory[]>([])
+  
+  // Kanban board state
+  const [kanbanIssues, setKanbanIssues] = useState<KanbanIssue[]>([])
+  const [kanbanDraggedIssue, setKanbanDraggedIssue] = useState<string | null>(null)
+  const [kanbanDragOverColumn, setKanbanDragOverColumn] = useState<string | null>(null)
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
@@ -85,6 +112,17 @@ export default function AssistantPage() {
   const [assignmentTarget, setAssignmentTarget] = useState<"backlog" | "sprint">("backlog")
   const [draggedStory, setDraggedStory] = useState<string | null>(null)
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null)
+  
+  // Finalize functionality
+  const [hasProcessedAudio, setHasProcessedAudio] = useState(false)
+  const [isFinalizing, setIsFinalizing] = useState(false)
+  const [finalizeProgress, setFinalizeProgress] = useState(0)
+  const [finalizeStage, setFinalizeStage] = useState("")
+  const [isFinalized, setIsFinalized] = useState(false)
+  
+  // Edit functionality
+  const [editingIssue, setEditingIssue] = useState<string | null>(null)
+  const [editFormData, setEditFormData] = useState<Partial<KanbanIssue>>({})
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -205,8 +243,58 @@ export default function AssistantPage() {
         setGeneratedStories(newStories)
         setIsProcessing(false)
         setSelectedFile(null)
+        setHasProcessedAudio(true)
       }
     }, 600) // 600ms per stage for smooth progression
+  }
+
+  const handleFinalize = () => {
+    setIsFinalizing(true)
+    setFinalizeProgress(0)
+    setFinalizeStage("Preparing sprint stories...")
+
+    const finalizeStages = [
+      { progress: 25, text: "Converting stories to kanban issues..." },
+      { progress: 50, text: "Clearing generated stories and backlog..." },
+      { progress: 75, text: "Moving sprint stories to kanban board..." },
+      { progress: 100, text: "Finalizing project setup..." }
+    ]
+
+    let currentStage = 0
+    const finalizeInterval = setInterval(() => {
+      if (currentStage < finalizeStages.length) {
+        setFinalizeProgress(finalizeStages[currentStage].progress)
+        setFinalizeStage(finalizeStages[currentStage].text)
+        currentStage++
+      } else {
+        clearInterval(finalizeInterval)
+        
+        // Convert sprint stories to kanban issues and move to "To Do" column
+        const kanbanIssuesFromSprint: KanbanIssue[] = sprintStories.map((story) => ({
+          id: story.id.replace('GEN-', 'HACK-'),
+          title: story.title,
+          description: story.description,
+          status: "todo" as const,
+          priority: story.priority,
+          type: story.type,
+          assignee: story.assignedTo,
+          reporter: "AI Assistant",
+          created: new Date().toISOString().split("T")[0],
+          sprint: story.sprint,
+          storyPoints: story.storyPoints,
+          acceptanceCriteria: story.acceptanceCriteria,
+        }))
+
+        // Clear all assistant columns and move to kanban
+        setGeneratedStories([])
+        setBacklogStories([])
+        setSprintStories([])
+        setKanbanIssues(kanbanIssuesFromSprint)
+        
+        setIsFinalizing(false)
+        setIsFinalized(true)
+      }
+    }, 800) // 800ms per stage for finalize process
   }
 
   // Drag and drop handlers
@@ -359,8 +447,78 @@ export default function AssistantPage() {
     return config?.color || "bg-gray-500"
   }
 
+  // Kanban drag and drop handlers
+  const handleKanbanDragStart = (e: React.DragEvent, issueId: string) => {
+    setKanbanDraggedIssue(issueId)
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", issueId)
+  }
+
+  const handleKanbanDragEnd = () => {
+    setKanbanDraggedIssue(null)
+    setKanbanDragOverColumn(null)
+  }
+
+  const handleKanbanDragOver = (e: React.DragEvent, targetStatus: string) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setKanbanDragOverColumn(targetStatus)
+  }
+
+  const handleKanbanDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX
+    const y = e.clientY
+    if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+      setKanbanDragOverColumn(null)
+    }
+  }
+
+  const handleKanbanDrop = (e: React.DragEvent, targetStatus: string) => {
+    e.preventDefault()
+    const issueId = e.dataTransfer.getData("text/plain")
+    
+    setKanbanIssues((prevIssues) =>
+      prevIssues.map((issue) =>
+        issue.id === issueId
+          ? { ...issue, status: targetStatus as KanbanIssue["status"] }
+          : issue
+      )
+    )
+    
+    setKanbanDraggedIssue(null)
+    setKanbanDragOverColumn(null)
+  }
+
+  // Edit functionality
+  const startEditing = (issue: KanbanIssue) => {
+    setEditingIssue(issue.id)
+    setEditFormData(issue)
+  }
+
+  const cancelEditing = () => {
+    setEditingIssue(null)
+    setEditFormData({})
+  }
+
+  const saveEdit = () => {
+    if (!editingIssue || !editFormData) return
+    
+    setKanbanIssues((prevIssues) =>
+      prevIssues.map((issue) =>
+        issue.id === editingIssue
+          ? { ...issue, ...editFormData }
+          : issue
+      )
+    )
+    
+    setEditingIssue(null)
+    setEditFormData({})
+  }
+
   return (
-    <div className="p-6 h-screen overflow-hidden">
+    <div className="p-6 min-h-screen overflow-auto">
       {/* Loading Screen Overlay */}
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -414,230 +572,392 @@ export default function AssistantPage() {
         )}
       </div>
 
-      {/* Three Column Layout */}
-      <div className="grid grid-cols-3 gap-6 h-[calc(100vh-200px)]">
-        {/* Column 1: Generated Stories */}
-        <div
-          className={`bg-white rounded-lg border p-4 overflow-hidden flex flex-col transition-all duration-200 ${
-            dragOverColumn === "generated" ? "ring-2 ring-blue-400 bg-blue-50" : ""
-          }`}
-          onDragOver={(e) => handleDragOver(e, "generated")}
-          onDragLeave={(e) => handleDragLeave(e)}
-          onDrop={(e) => handleDrop(e, "generated")}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-700">Generated Stories</h3>
-            <Badge variant="secondary">{generatedStories.length}</Badge>
+      {/* Three Column Layout - Only show if not finalized */}
+      {!isFinalized && (
+        <div className="grid grid-cols-3 gap-6 h-[calc(100vh-300px)] mb-8">
+          {/* Column 1: Generated Stories */}
+          <div
+            className={`bg-white rounded-lg border p-4 overflow-hidden flex flex-col transition-all duration-200 ${
+              dragOverColumn === "generated" ? "ring-2 ring-blue-400 bg-blue-50" : ""
+            }`}
+            onDragOver={(e) => handleDragOver(e, "generated")}
+            onDragLeave={(e) => handleDragLeave(e)}
+            onDrop={(e) => handleDrop(e, "generated")}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-700">Generated Stories</h3>
+              <Badge variant="secondary">{generatedStories.length}</Badge>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {generatedStories.length === 0 && !isProcessing && (
+                <div className="text-center py-8 text-gray-500">
+                  <FileAudio className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>Upload an audio file to generate stories</p>
+                </div>
+              )}
+
+              {generatedStories.map((story) => (
+                <Card
+                  key={story.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, story.id, "generated")}
+                  onDragEnd={handleDragEnd}
+                  className={`cursor-move hover:shadow-md transition-all duration-200 ${
+                    draggedStory === story.id ? "opacity-50 rotate-2 scale-105" : ""
+                  }`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        {getTypeIcon(story.type)}
+                        <span className="text-sm font-medium text-gray-600">{story.id}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <GripVertical className="w-3 h-3 text-gray-400" />
+                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
+                      </div>
+                    </div>
+
+                    <h5 className="font-medium mb-2">{story.title}</h5>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
+
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {story.priority}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Button size="sm" className="w-full" onClick={() => moveToBacklog(story)}>
+                        <ArrowRight className="w-3 h-3 mr-1" />
+                        Add to Backlog
+                      </Button>
+                      <Button size="sm" variant="outline" className="w-full" onClick={() => moveToSprint(story)}>
+                        <Calendar className="w-3 h-3 mr-1" />
+                        Add to Sprint
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3">
-            {generatedStories.length === 0 && !isProcessing && (
-              <div className="text-center py-8 text-gray-500">
-                <FileAudio className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>Upload an audio file to generate stories</p>
-              </div>
-            )}
+          {/* Column 2: Backlog Items */}
+          <div
+            className={`bg-gray-50 rounded-lg border p-4 overflow-hidden flex flex-col transition-all duration-200 ${
+              dragOverColumn === "backlog" ? "ring-2 ring-blue-400 bg-blue-50" : ""
+            }`}
+            onDragOver={(e) => handleDragOver(e, "backlog")}
+            onDragLeave={(e) => handleDragLeave(e)}
+            onDrop={(e) => handleDrop(e, "backlog")}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-700">Backlog</h3>
+              <Badge variant="secondary">{backlogStories.length}</Badge>
+            </div>
 
-            {generatedStories.map((story) => (
-              <Card
-                key={story.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, story.id, "generated")}
-                onDragEnd={handleDragEnd}
-                className={`cursor-move hover:shadow-md transition-all duration-200 ${
-                  draggedStory === story.id ? "opacity-50 rotate-2 scale-105" : ""
-                }`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      {getTypeIcon(story.type)}
-                      <span className="text-sm font-medium text-gray-600">{story.id}</span>
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {backlogStories.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Circle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No items in backlog</p>
+                </div>
+              )}
+
+              {backlogStories.map((story) => (
+                <Card
+                  key={story.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, story.id, "backlog")}
+                  onDragEnd={handleDragEnd}
+                  className={`bg-white cursor-move hover:shadow-md transition-all duration-200 ${
+                    draggedStory === story.id ? "opacity-50 rotate-2 scale-105" : ""
+                  }`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        {getTypeIcon(story.type)}
+                        <span className="text-sm font-medium text-gray-600">{story.id}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <GripVertical className="w-3 h-3 text-gray-400" />
+                        <Badge variant="default" className="bg-blue-100 text-blue-800">
+                          Backlog
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <GripVertical className="w-3 h-3 text-gray-400" />
+
+                    <h5 className="font-medium mb-2">{story.title}</h5>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
+
+                    {story.assignedTo && (
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarFallback className="text-xs">
+                            {story.assignedTo
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs text-gray-600">{story.assignedTo}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs">
+                        {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
+                      </Badge>
                       <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
                     </div>
-                  </div>
-
-                  <h5 className="font-medium mb-2">{story.title}</h5>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
-
-                  <div className="flex items-center justify-between mb-3">
-                    <Badge variant="outline" className="text-xs">
-                      {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {story.priority}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Button size="sm" className="w-full" onClick={() => moveToBacklog(story)}>
-                      <ArrowRight className="w-3 h-3 mr-1" />
-                      Add to Backlog
-                    </Button>
-                    <Button size="sm" variant="outline" className="w-full" onClick={() => moveToSprint(story)}>
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Add to Sprint
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Column 2: Backlog Items */}
-        <div
-          className={`bg-gray-50 rounded-lg border p-4 overflow-hidden flex flex-col transition-all duration-200 ${
-            dragOverColumn === "backlog" ? "ring-2 ring-blue-400 bg-blue-50" : ""
-          }`}
-          onDragOver={(e) => handleDragOver(e, "backlog")}
-          onDragLeave={(e) => handleDragLeave(e)}
-          onDrop={(e) => handleDrop(e, "backlog")}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-700">Backlog</h3>
-            <Badge variant="secondary">{backlogStories.length}</Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3">
-            {backlogStories.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Circle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>No items in backlog</p>
-              </div>
-            )}
+          {/* Column 3: Sprint Planning Items */}
+          <div
+            className={`bg-green-50 rounded-lg border p-4 overflow-hidden flex flex-col transition-all duration-200 ${
+              dragOverColumn === "sprint" ? "ring-2 ring-blue-400 bg-blue-50" : ""
+            }`}
+            onDragOver={(e) => handleDragOver(e, "sprint")}
+            onDragLeave={(e) => handleDragLeave(e)}
+            onDrop={(e) => handleDrop(e, "sprint")}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-700">Sprint Planning</h3>
+              <Badge variant="secondary">{sprintStories.length}</Badge>
+            </div>
 
-            {backlogStories.map((story) => (
-              <Card
-                key={story.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, story.id, "backlog")}
-                onDragEnd={handleDragEnd}
-                className={`bg-white cursor-move hover:shadow-md transition-all duration-200 ${
-                  draggedStory === story.id ? "opacity-50 rotate-2 scale-105" : ""
-                }`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      {getTypeIcon(story.type)}
-                      <span className="text-sm font-medium text-gray-600">{story.id}</span>
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {sprintStories.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No items in sprint</p>
+                </div>
+              )}
+
+              {sprintStories.map((story) => (
+                <Card
+                  key={story.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, story.id, "sprint")}
+                  onDragEnd={handleDragEnd}
+                  className={`bg-white cursor-move hover:shadow-md transition-all duration-200 ${
+                    draggedStory === story.id ? "opacity-50 rotate-2 scale-105" : ""
+                  }`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        {getTypeIcon(story.type)}
+                        <span className="text-sm font-medium text-gray-600">{story.id}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <GripVertical className="w-3 h-3 text-gray-400" />
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          {story.sprint}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <GripVertical className="w-3 h-3 text-gray-400" />
-                      <Badge variant="default" className="bg-blue-100 text-blue-800">
-                        Backlog
+
+                    <h5 className="font-medium mb-2">{story.title}</h5>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
+
+                    {story.assignedTo && (
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarFallback className="text-xs">
+                            {story.assignedTo
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs text-gray-600">{story.assignedTo}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs">
+                        {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
                       </Badge>
+                      <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
                     </div>
-                  </div>
-
-                  <h5 className="font-medium mb-2">{story.title}</h5>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
-
-                  {story.assignedTo && (
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Avatar className="h-5 w-5">
-                        <AvatarFallback className="text-xs">
-                          {story.assignedTo
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-gray-600">{story.assignedTo}</span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
-                    </Badge>
-                    <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Column 3: Sprint Planning Items */}
-        <div
-          className={`bg-green-50 rounded-lg border p-4 overflow-hidden flex flex-col transition-all duration-200 ${
-            dragOverColumn === "sprint" ? "ring-2 ring-blue-400 bg-blue-50" : ""
-          }`}
-          onDragOver={(e) => handleDragOver(e, "sprint")}
-          onDragLeave={(e) => handleDragLeave(e)}
-          onDrop={(e) => handleDrop(e, "sprint")}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-700">Sprint Planning</h3>
-            <Badge variant="secondary">{sprintStories.length}</Badge>
+      {/* Finalize Loading Screen Overlay */}
+      {isFinalizing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 animate-spin text-green-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Finalizing Project</h3>
+              <p className="text-gray-600 mb-6">{finalizeStage}</p>
+              <Progress value={finalizeProgress} className="w-full mb-2" />
+              <p className="text-sm text-gray-500">{finalizeProgress}% complete</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Kanban Board - Only show after finalization */}
+      {isFinalized && (
+        <div className="mt-8 border-t pt-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">Sprint Board</h2>
+            <Badge variant="secondary">{kanbanIssues.length} issues</Badge>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3">
-            {sprintStories.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>No items in sprint</p>
-              </div>
-            )}
-
-            {sprintStories.map((story) => (
-              <Card
-                key={story.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, story.id, "sprint")}
-                onDragEnd={handleDragEnd}
-                className={`bg-white cursor-move hover:shadow-md transition-all duration-200 ${
-                  draggedStory === story.id ? "opacity-50 rotate-2 scale-105" : ""
+          <div className="grid grid-cols-4 gap-6 h-[500px]">
+            {projectConfig.statusColumns.map((column) => (
+              <div
+                key={column.id}
+                className={`${column.color} rounded-lg p-4 transition-all duration-200 ${
+                  kanbanDragOverColumn === column.status ? "ring-2 ring-blue-400 bg-blue-50" : ""
                 }`}
+                onDragOver={(e) => handleKanbanDragOver(e, column.status)}
+                onDragLeave={handleKanbanDragLeave}
+                onDrop={(e) => handleKanbanDrop(e, column.status)}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      {getTypeIcon(story.type)}
-                      <span className="text-sm font-medium text-gray-600">{story.id}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <GripVertical className="w-3 h-3 text-gray-400" />
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        {story.sprint}
-                      </Badge>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-gray-700">{column.title}</h4>
+                  <Badge variant="secondary">
+                    {kanbanIssues.filter((issue) => issue.status === column.status).length}
+                  </Badge>
+                </div>
 
-                  <h5 className="font-medium mb-2">{story.title}</h5>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{story.description}</p>
+                <div className="space-y-3 min-h-[400px] overflow-y-auto">
+                  {kanbanIssues
+                    .filter((issue) => issue.status === column.status)
+                    .map((issue) => (
+                      <Card
+                        key={issue.id}
+                        draggable
+                        onDragStart={(e) => handleKanbanDragStart(e, issue.id)}
+                        onDragEnd={handleKanbanDragEnd}
+                        className={`cursor-move hover:shadow-md transition-all duration-200 ${
+                          kanbanDraggedIssue === issue.id ? "opacity-50 rotate-2 scale-105" : ""
+                        }`}
+                      >
+                        <CardContent className="p-4">
+                          {editingIssue === issue.id ? (
+                            <div className="space-y-3">
+                              <Input
+                                value={editFormData.title || ""}
+                                onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                className="font-medium"
+                              />
+                              <Textarea
+                                value={editFormData.description || ""}
+                                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                className="text-sm"
+                                rows={2}
+                              />
+                              <div className="flex items-center space-x-2">
+                                <Button size="sm" onClick={saveEdit}>
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Save
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={cancelEditing}>
+                                  <X className="w-3 h-3 mr-1" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  {getTypeIcon(issue.type)}
+                                  <span className="text-sm font-medium text-gray-600">{issue.id}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => startEditing(issue)}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </Button>
+                                  <GripVertical className="w-3 h-3 text-gray-400" />
+                                </div>
+                              </div>
 
-                  {story.assignedTo && (
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Avatar className="h-5 w-5">
-                        <AvatarFallback className="text-xs">
-                          {story.assignedTo
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-gray-600">{story.assignedTo}</span>
-                    </div>
-                  )}
+                              <h5 className="font-medium mb-2">{issue.title}</h5>
+                              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{issue.description}</p>
 
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      {story.storyPoints ? `${story.storyPoints} pts` : "Unestimated"}
-                    </Badge>
-                    <div className={`w-2 h-2 rounded-full ${getPriorityColor(story.priority)}`} />
-                  </div>
-                </CardContent>
-              </Card>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <div className={`w-2 h-2 rounded-full ${getPriorityColor(issue.priority)}`} />
+                                  {issue.storyPoints && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {issue.storyPoints} pts
+                                    </Badge>
+                                  )}
+                                </div>
+                                {issue.assignee ? (
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarFallback className="text-xs">
+                                      {issue.assignee
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .join("")}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span className="text-xs text-gray-500">?</span>
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Finalize Button - Fixed at bottom right, only show after audio processed */}
+      {hasProcessedAudio && !isFinalized && (
+        <Button
+          onClick={handleFinalize}
+          disabled={isFinalizing || sprintStories.length === 0}
+          className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white shadow-lg z-40"
+          size="lg"
+        >
+          {isFinalizing ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Finalizing...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Finalize Project
+            </>
+          )}
+        </Button>
+      )}
 
       {/* Assignment Dialog */}
       <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
